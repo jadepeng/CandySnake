@@ -17,10 +17,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -59,6 +58,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.R
 import com.example.game.GameMode
@@ -112,43 +112,47 @@ fun HomeScreen(
                 )
             )
             .drawBehind {
-                // Playful pastel sugar sprinkle circles in background
                 drawCircle(
                     color = CandyPinkLight.copy(alpha = 0.65f),
-                    radius = size.width * 0.28f,
-                    center = Offset(size.width * 0.92f, size.height * 0.08f),
+                    radius = size.minDimension * 0.34f,
+                    center = Offset(size.width * 0.92f, size.height * 0.10f),
                 )
                 drawCircle(
                     color = CandyMintLight.copy(alpha = 0.7f),
-                    radius = size.width * 0.24f,
-                    center = Offset(size.width * 0.06f, size.height * 0.34f),
+                    radius = size.minDimension * 0.30f,
+                    center = Offset(size.width * 0.06f, size.height * 0.36f),
                 )
                 drawCircle(
                     color = CandyLemonLight.copy(alpha = 0.7f),
-                    radius = size.width * 0.22f,
-                    center = Offset(size.width * 0.90f, size.height * 0.78f),
+                    radius = size.minDimension * 0.28f,
+                    center = Offset(size.width * 0.88f, size.height * 0.84f),
                 )
             },
     ) {
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
-                .navigationBarsPadding(),
+                .safeDrawingPadding(),
             contentAlignment = Alignment.TopCenter,
         ) {
-            val isWide = maxWidth >= 660.dp
+            val isWide = maxWidth >= 640.dp || maxWidth > maxHeight
+            val heroHeight = when {
+                isWide && maxHeight >= 580.dp -> 240.dp
+                isWide -> 156.dp
+                else -> 176.dp
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .widthIn(max = 880.dp)
-                    .padding(horizontal = 20.dp),
+                    .widthIn(max = 1120.dp)
+                    .padding(horizontal = if (isWide) 24.dp else 20.dp),
             ) {
                 // Top Header Bar
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 12.dp, bottom = 12.dp),
+                        .padding(top = 10.dp, bottom = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -186,44 +190,68 @@ fun HomeScreen(
                     }
                 }
 
-                // Scrollable Content Body
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    if (isWide) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalAlignment = Alignment.Top,
+                if (isWide) {
+                    // Landscape & Tablet Two-Column Balanced Dashboard
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
+                            .padding(bottom = 14.dp),
+                        horizontalArrangement = Arrangement.spacedBy(20.dp),
+                        verticalAlignment = Alignment.Top,
+                    ) {
+                        Column(
+                            modifier = Modifier.weight(1.05f),
+                            verticalArrangement = Arrangement.spacedBy(14.dp),
                         ) {
                             HeroBannerCard(
                                 selectedMode = settings.selectedMode,
                                 bestScore = activeBest,
-                                modifier = Modifier.weight(1.05f),
+                                height = heroHeight,
+                                modifier = Modifier.fillMaxWidth(),
                             )
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(14.dp),
-                            ) {
-                                ModeSelectorSection(
-                                    selectedMode = settings.selectedMode,
-                                    classicBest = classicBest,
-                                    endlessBest = endlessBest,
-                                    onSelectMode = onSelectMode,
-                                )
-                                SkinSelectorCard(
-                                    selectedSkin = settings.snakeSkin,
-                                    onSelectSkin = onSelectSkin,
-                                )
-                            }
+                            PowerUpGuideCard()
                         }
-                    } else {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(14.dp),
+                        ) {
+                            ModeSelectorSection(
+                                selectedMode = settings.selectedMode,
+                                classicBest = classicBest,
+                                endlessBest = endlessBest,
+                                onSelectMode = onSelectMode,
+                            )
+                            SkinSelectorCard(
+                                selectedSkin = settings.snakeSkin,
+                                onSelectSkin = onSelectSkin,
+                            )
+                            Candy3DButton(
+                                text = stringResource(R.string.action_start_game),
+                                icon = Icons.Rounded.PlayArrow,
+                                containerColor = CandyPink,
+                                shadowColor = CandyPinkDark,
+                                onClick = { onStartGame(settings.selectedMode) },
+                                modifier = Modifier.fillMaxWidth(),
+                                height = 56.dp,
+                                cornerRadius = 26.dp,
+                                testTag = "start_game_button",
+                            )
+                        }
+                    }
+                } else {
+                    // Portrait Phone / Portrait Tablet Flow
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
                         HeroBannerCard(
                             selectedMode = settings.selectedMode,
                             bestScore = activeBest,
+                            height = heroHeight,
                             modifier = Modifier.fillMaxWidth(),
                         )
                         ModeSelectorSection(
@@ -236,33 +264,30 @@ fun HomeScreen(
                             selectedSkin = settings.snakeSkin,
                             onSelectSkin = onSelectSkin,
                         )
+                        PowerUpGuideCard()
+                        Spacer(modifier = Modifier.height(6.dp))
                     }
 
-                    PowerUpGuideCard()
-
-                    Spacer(modifier = Modifier.height(6.dp))
-                }
-
-                // Bottom Sticky Start CTA
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 14.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Candy3DButton(
-                        text = stringResource(R.string.action_start_game),
-                        icon = Icons.Rounded.PlayArrow,
-                        containerColor = CandyPink,
-                        shadowColor = CandyPinkDark,
-                        onClick = { onStartGame(settings.selectedMode) },
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .widthIn(max = 460.dp),
-                        height = 58.dp,
-                        cornerRadius = 26.dp,
-                        testTag = "start_game_button",
-                    )
+                            .padding(top = 8.dp, bottom = 14.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Candy3DButton(
+                            text = stringResource(R.string.action_start_game),
+                            icon = Icons.Rounded.PlayArrow,
+                            containerColor = CandyPink,
+                            shadowColor = CandyPinkDark,
+                            onClick = { onStartGame(settings.selectedMode) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .widthIn(max = 460.dp),
+                            height = 58.dp,
+                            cornerRadius = 26.dp,
+                            testTag = "start_game_button",
+                        )
+                    }
                 }
             }
         }
@@ -273,10 +298,11 @@ fun HomeScreen(
 private fun HeroBannerCard(
     selectedMode: GameMode,
     bestScore: Int,
+    height: Dp,
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        modifier = modifier.height(176.dp),
+        modifier = modifier.height(height),
         shape = RoundedCornerShape(28.dp),
         border = BorderStroke(2.5.dp, Color.White),
         shadowElevation = 6.dp,
@@ -288,7 +314,6 @@ private fun HeroBannerCard(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
             )
-            // Subtle bottom readability gradient
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -300,7 +325,6 @@ private fun HeroBannerCard(
                         )
                     ),
             )
-            // Floating Best Score Trophy Pill
             Surface(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
@@ -485,7 +509,6 @@ private fun SkinSelectorCard(
                     style = MaterialTheme.typography.titleMedium,
                     color = CandyCocoaInk,
                 )
-                // Cute Live Mini Snake Preview
                 MiniCandySnakePreview(
                     skin = selectedSkin,
                     modifier = Modifier
@@ -562,7 +585,6 @@ private fun MiniCandySnakePreview(
         val segments = 5
         val step = (endX - startX) / (segments - 1)
 
-        // Outer gummy outline
         drawLine(
             color = skin.outlineColor,
             start = Offset(startX, y),
@@ -570,7 +592,6 @@ private fun MiniCandySnakePreview(
             strokeWidth = r * 2.15f,
             cap = StrokeCap.Round,
         )
-        // Body
         drawLine(
             color = skin.primaryColor,
             start = Offset(startX, y),
@@ -590,7 +611,6 @@ private fun MiniCandySnakePreview(
                 center = Offset(cx - segR * 0.25f, y - segR * 0.30f),
             )
         }
-        // Cute Eyes on right-most head
         val headX = endX
         drawCircle(color = Color.White, radius = r * 0.34f, center = Offset(headX + r * 0.2f, y - r * 0.32f))
         drawCircle(color = Color.White, radius = r * 0.34f, center = Offset(headX + r * 0.2f, y + r * 0.32f))

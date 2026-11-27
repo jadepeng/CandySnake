@@ -6,8 +6,9 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -125,13 +126,29 @@ fun SnakeBoardCanvas(
         }
     }
 
-    Box(
-        modifier = modifier
-            .aspectRatio(state.cols.toFloat() / state.rows.toFloat())
-            .testTag("snake_game_board")
-            .then(gestureModifier),
+    val boardAspect = state.cols.toFloat() / state.rows.toFloat()
+
+    BoxWithConstraints(
+        modifier = modifier,
+        contentAlignment = androidx.compose.ui.Alignment.Center,
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
+        val widthBound = maxWidth
+        val heightBound = maxHeight
+        val (targetWidth, targetHeight) = if (widthBound / heightBound > boardAspect) {
+            val h = heightBound
+            (h * boardAspect) to h
+        } else {
+            val w = widthBound
+            w to (w / boardAspect)
+        }
+
+        Box(
+            modifier = Modifier
+                .size(width = targetWidth, height = targetHeight)
+                .testTag("snake_game_board")
+                .then(gestureModifier),
+        ) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
             val frameThickness = size.minDimension * 0.032f
             val innerWidth = size.width - frameThickness * 2f
             val innerHeight = size.height - frameThickness * 2f
@@ -249,6 +266,7 @@ fun SnakeBoardCanvas(
                     cornerRadius = CornerRadius(outerCorner, outerCorner),
                     style = Stroke(width = frameThickness * 1.1f),
                 )
+            }
             }
         }
     }

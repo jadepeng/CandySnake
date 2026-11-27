@@ -87,4 +87,8 @@
     <string name="cd_dir_down">向下移动</string>
     <string name="cd_dir_left">向左移动</string>
     <string name="cd_dir_right">向右移动</string>
+    <string name="cd_swap_hands">切换左右手布局</string>
+    <string name="label_tablet_keyboard_hint">支持触屏滑动、方向键或外接键盘 WASD / 方向键</string>
+    <string name="label_swap_hand_left">按键在左</string>
+    <string name="label_swap_hand_right">按键在右</string>
 </resources>

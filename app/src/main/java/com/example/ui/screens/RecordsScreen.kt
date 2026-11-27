@@ -5,23 +5,26 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.DeleteOutline
@@ -37,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -85,7 +89,8 @@ fun RecordsScreen(
     onClearRecords: () -> Unit,
     onBack: () -> Unit,
 ) {
-    var selectedMode by remember { mutableStateOf(initialMode) }
+    var selectedModeKey by rememberSaveable { mutableStateOf(initialMode.storageKey) }
+    val selectedMode = GameMode.fromKey(selectedModeKey)
     var showClearConfirm by remember { mutableStateOf(false) }
 
     val records = if (selectedMode == GameMode.CLASSIC) classicRecords else endlessRecords
@@ -102,167 +107,117 @@ fun RecordsScreen(
             ),
         contentAlignment = Alignment.TopCenter,
     ) {
-        Column(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .widthIn(max = 760.dp)
-                .statusBarsPadding()
-                .navigationBarsPadding()
-                .padding(horizontal = 18.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+                .safeDrawingPadding(),
+            contentAlignment = Alignment.TopCenter,
         ) {
-            // Top Bar
-            Row(
+            val isWide = maxWidth >= 660.dp || maxWidth > maxHeight
+            val isCompactHeight = maxHeight < 480.dp
+
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
+                    .fillMaxSize()
+                    .widthIn(max = 1080.dp)
+                    .padding(horizontal = if (isWide) 24.dp else 18.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                CandyIconButton(
-                    icon = Icons.AutoMirrored.Rounded.ArrowBack,
-                    contentDescription = stringResource(R.string.cd_back),
-                    onClick = onBack,
-                    testTag = "records_back_button",
-                )
-                Text(
-                    text = stringResource(R.string.label_records_title),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = CandyCocoaInk,
-                )
-                if (hasAnyRecords) {
-                    CandyIconButton(
-                        icon = Icons.Rounded.DeleteOutline,
-                        contentDescription = stringResource(R.string.action_clear_records),
-                        onClick = { showClearConfirm = true },
-                        iconTint = CandyPinkDark,
-                        testTag = "records_clear_button",
-                    )
-                } else {
-                    Spacer(modifier = Modifier.size(48.dp))
-                }
-            }
-
-            // Career Stats Banner
-            CandyCard(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(14.dp),
-            ) {
+                // Top Bar
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    CareerStatBox(
-                        label = stringResource(R.string.label_total_games),
-                        value = careerStats.totalGames.toString(),
-                        bg = CandyPinkLight,
-                        valueColor = CandyPinkDark,
-                        modifier = Modifier.weight(1f),
+                    CandyIconButton(
+                        icon = Icons.AutoMirrored.Rounded.ArrowBack,
+                        contentDescription = stringResource(R.string.cd_back),
+                        onClick = onBack,
+                        testTag = "records_back_button",
                     )
-                    CareerStatBox(
-                        label = stringResource(R.string.label_max_length),
-                        value = careerStats.maxLength.toString(),
-                        bg = CandyMintLight,
-                        valueColor = Color(0xFF158A63),
-                        modifier = Modifier.weight(1f),
+                    Text(
+                        text = stringResource(R.string.label_records_title),
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = CandyCocoaInk,
                     )
-                    CareerStatBox(
-                        label = stringResource(R.string.label_total_candies),
-                        value = careerStats.totalCandies.toString(),
-                        bg = CandyLemonLight,
-                        valueColor = CandyLemonDark,
-                        modifier = Modifier.weight(1f),
-                    )
+                    if (hasAnyRecords) {
+                        CandyIconButton(
+                            icon = Icons.Rounded.DeleteOutline,
+                            contentDescription = stringResource(R.string.action_clear_records),
+                            onClick = { showClearConfirm = true },
+                            iconTint = CandyPinkDark,
+                            testTag = "records_clear_button",
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.size(48.dp))
+                    }
                 }
-            }
 
-            // Mode Filter Tabs
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                SelectableCandyChip(
-                    label = stringResource(GameMode.CLASSIC.labelRes),
-                    selected = selectedMode == GameMode.CLASSIC,
-                    activeColor = CandyMint,
-                    onClick = { selectedMode = GameMode.CLASSIC },
-                    modifier = Modifier
-                        .weight(1f)
-                        .testTag("records_tab_classic"),
-                )
-                SelectableCandyChip(
-                    label = stringResource(GameMode.ENDLESS.labelRes),
-                    selected = selectedMode == GameMode.ENDLESS,
-                    activeColor = CandyBlueberry,
-                    onClick = { selectedMode = GameMode.ENDLESS },
-                    modifier = Modifier
-                        .weight(1f)
-                        .testTag("records_tab_endless"),
-                )
-            }
-
-            // Records List or Cute Empty Jar State
-            if (records.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CandyCard(
+                if (isWide) {
+                    // Tablet & Landscape 2-Pane Layout
+                    Row(
                         modifier = Modifier
+                            .weight(1f)
                             .fillMaxWidth()
-                            .widthIn(max = 360.dp),
-                        contentPadding = PaddingValues(24.dp),
+                            .padding(bottom = 14.dp),
+                        horizontalArrangement = Arrangement.spacedBy(20.dp),
                     ) {
                         Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .weight(0.42f)
+                                .fillMaxHeight()
+                                .verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(14.dp),
                         ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.img_empty_jar),
-                                contentDescription = stringResource(R.string.cd_empty_jar),
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .size(164.dp)
-                                    .clip(RoundedCornerShape(28.dp)),
+                            CareerStatsCard(careerStats = careerStats)
+                            ModeTabsRow(
+                                selectedMode = selectedMode,
+                                onSelectMode = { selectedModeKey = it.storageKey },
                             )
-                            Text(
-                                text = stringResource(R.string.label_empty_records_title),
-                                style = MaterialTheme.typography.titleLarge,
-                                color = CandyCocoaInk,
-                                textAlign = TextAlign.Center,
-                            )
-                            Text(
-                                text = stringResource(R.string.label_empty_records_desc),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = CandyCocoaMuted,
-                                textAlign = TextAlign.Center,
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
                             Candy3DButton(
                                 text = stringResource(R.string.action_start_game),
                                 icon = Icons.Rounded.PlayArrow,
                                 onClick = { onStartGame(selectedMode) },
                                 modifier = Modifier.fillMaxWidth(),
-                                height = 50.dp,
-                                testTag = "records_empty_start_button",
+                                height = 52.dp,
+                                testTag = "records_tablet_start_button",
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .weight(0.58f)
+                                .fillMaxHeight(),
+                        ) {
+                            RecordsListOrEmpty(
+                                records = records,
+                                selectedMode = selectedMode,
+                                dateFormatter = dateFormatter,
+                                onStartGame = onStartGame,
+                                compactEmpty = isCompactHeight,
                             )
                         }
                     }
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    contentPadding = PaddingValues(bottom = 18.dp),
-                ) {
-                    itemsIndexed(records, key = { _, item -> item.id }) { index, record ->
-                        RecordRowCard(
-                            rank = index + 1,
-                            record = record,
-                            formattedTime = dateFormatter.format(Date(record.timestamp)),
+                } else {
+                    // Portrait Layout
+                    CareerStatsCard(careerStats = careerStats)
+                    ModeTabsRow(
+                        selectedMode = selectedMode,
+                        onSelectMode = { selectedModeKey = it.storageKey },
+                    )
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                    ) {
+                        RecordsListOrEmpty(
+                            records = records,
+                            selectedMode = selectedMode,
+                            dateFormatter = dateFormatter,
+                            onStartGame = onStartGame,
+                            compactEmpty = false,
                         )
                     }
                 }
@@ -312,6 +267,146 @@ fun RecordsScreen(
                 }
             },
         )
+    }
+}
+
+@Composable
+private fun CareerStatsCard(careerStats: CareerStats) {
+    CandyCard(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(14.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            CareerStatBox(
+                label = stringResource(R.string.label_total_games),
+                value = careerStats.totalGames.toString(),
+                bg = CandyPinkLight,
+                valueColor = CandyPinkDark,
+                modifier = Modifier.weight(1f),
+            )
+            CareerStatBox(
+                label = stringResource(R.string.label_max_length),
+                value = careerStats.maxLength.toString(),
+                bg = CandyMintLight,
+                valueColor = Color(0xFF158A63),
+                modifier = Modifier.weight(1f),
+            )
+            CareerStatBox(
+                label = stringResource(R.string.label_total_candies),
+                value = careerStats.totalCandies.toString(),
+                bg = CandyLemonLight,
+                valueColor = CandyLemonDark,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ModeTabsRow(
+    selectedMode: GameMode,
+    onSelectMode: (GameMode) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        SelectableCandyChip(
+            label = stringResource(GameMode.CLASSIC.labelRes),
+            selected = selectedMode == GameMode.CLASSIC,
+            activeColor = CandyMint,
+            onClick = { onSelectMode(GameMode.CLASSIC) },
+            modifier = Modifier
+                .weight(1f)
+                .testTag("records_tab_classic"),
+        )
+        SelectableCandyChip(
+            label = stringResource(GameMode.ENDLESS.labelRes),
+            selected = selectedMode == GameMode.ENDLESS,
+            activeColor = CandyBlueberry,
+            onClick = { onSelectMode(GameMode.ENDLESS) },
+            modifier = Modifier
+                .weight(1f)
+                .testTag("records_tab_endless"),
+        )
+    }
+}
+
+@Composable
+private fun RecordsListOrEmpty(
+    records: List<GameRecordEntity>,
+    selectedMode: GameMode,
+    dateFormatter: SimpleDateFormat,
+    onStartGame: (GameMode) -> Unit,
+    compactEmpty: Boolean,
+) {
+    if (records.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            CandyCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .widthIn(max = 400.dp),
+                contentPadding = PaddingValues(if (compactEmpty) 16.dp else 24.dp),
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.img_empty_jar),
+                        contentDescription = stringResource(R.string.cd_empty_jar),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(if (compactEmpty) 110.dp else 164.dp)
+                            .clip(RoundedCornerShape(28.dp)),
+                    )
+                    Text(
+                        text = stringResource(R.string.label_empty_records_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = CandyCocoaInk,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        text = stringResource(R.string.label_empty_records_desc),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = CandyCocoaMuted,
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Candy3DButton(
+                        text = stringResource(R.string.action_start_game),
+                        icon = Icons.Rounded.PlayArrow,
+                        onClick = { onStartGame(selectedMode) },
+                        modifier = Modifier.fillMaxWidth(),
+                        height = 50.dp,
+                        testTag = "records_empty_start_button",
+                    )
+                }
+            }
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding = PaddingValues(bottom = 18.dp),
+        ) {
+            itemsIndexed(records, key = { _, item -> item.id }) { index, record ->
+                RecordRowCard(
+                    rank = index + 1,
+                    record = record,
+                    formattedTime = dateFormatter.format(Date(record.timestamp)),
+                )
+            }
+        }
     }
 }
 
