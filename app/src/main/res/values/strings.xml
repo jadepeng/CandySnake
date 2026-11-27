@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">糖果贪吃蛇</string>
+    <string name="app_subtitle">甜蜜开溜 · 趣吃缤纷糖果</string>
+
+    <!-- Modes -->
+    <string name="mode_classic">经典模式</string>
+    <string name="mode_classic_desc">撞墙或咬尾即结束</string>
+    <string name="mode_endless">无尽穿墙</string>
+    <string name="mode_endless_desc">边缘传送 · 畅快刷分</string>
+
+    <!-- Controls -->
+    <string name="control_both">手势 + 按键</string>
+    <string name="control_swipe">仅手势滑动</string>
+    <string name="control_dpad">仅虚拟方向键</string>
+    <string name="control_hint_swipe">在棋盘任意区域上下左右滑动转向</string>
+    <string name="control_hint_dpad">点击下方糖果方向键控制转向</string>
+    <string name="control_hint_both">支持滑动棋盘或点击方向键操控</string>
+
+    <!-- Speeds -->
+    <string name="speed_chill">悠闲</string>
+    <string name="speed_normal">标准</string>
+    <string name="speed_turbo">极速</string>
+
+    <!-- Skins -->
+    <string name="skin_mint">薄荷汽水</string>
+    <string name="skin_strawberry">草莓果冻</string>
+    <string name="skin_mango">芒果布丁</string>
+    <string name="skin_blueberry">蓝莓苏打</string>
+
+    <!-- Power-ups -->
+    <string name="powerup_speed">闪电泡泡糖</string>
+    <string name="powerup_speed_badge">加速 1.5x</string>
+    <string name="powerup_double">星星棒棒糖</string>
+    <string name="powerup_double_badge">双倍 2x</string>
+    <string name="powerup_slow">薄荷冰沙果</string>
+    <string name="powerup_slow_badge">减速护航</string>
+    <string name="powerup_donut">彩虹甜甜圈</string>
+
+    <!-- Home & Actions -->
+    <string name="action_start_game">开始游戏</string>
+    <string name="action_records">荣誉榜</string>
+    <string name="action_settings">设置</string>
+    <string name="action_resume">继续游戏</string>
+    <string name="action_restart">再来一局</string>
+    <string name="action_back_home">返回主页</string>
+    <string name="action_pause">暂停</string>
+    <string name="action_close">关闭</string>
+    <string name="action_clear_records">清空战绩</string>
+    <string name="action_confirm">确认</string>
+    <string name="action_cancel">取消</string>
+
+    <!-- Labels -->
+    <string name="label_score">得分</string>
+    <string name="label_best_score">最高分</string>
+    <string name="label_length">蛇长</string>
+    <string name="label_candies">吃糖</string>
+    <string name="label_powerups">道具</string>
+    <string name="label_duration">耗时</string>
+    <string name="label_total_games">累计局数</string>
+    <string name="label_max_length">历史最长</string>
+    <string name="label_total_candies">累计糖果</string>
+    <string name="label_new_record">新纪录!</string>
+    <string name="label_game_paused">暂停歇一口</string>
+    <string name="label_game_over">哎呀撞到啦!</string>
+    <string name="label_choose_mode">选择玩法</string>
+    <string name="label_choose_skin">挑选糖果皮肤</string>
+    <string name="label_powerup_guide">缤纷道具图鉴</string>
+    <string name="label_sound">卡通音效</string>
+    <string name="label_haptics">震动反馈</string>
+    <string name="label_control_mode">操控方式</string>
+    <string name="label_start_speed">初始速度</string>
+    <string name="label_records_title">糖果荣誉榜</string>
+    <string name="label_empty_records_title">糖果罐还是空的哦</string>
+    <string name="label_empty_records_desc">快去开一局，收集甜蜜高分装满罐子吧！</string>
+    <string name="label_tap_to_start">滑动或按方向键开始移动</string>
+    <string name="label_clear_confirm_title">清空本地战绩？</string>
+    <string name="label_clear_confirm_desc">此操作将清除所有本地历史最高分与对局记录，且无法撤销。</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_hero_banner">糖果贪吃蛇卡通横幅插画</string>
+    <string name="cd_empty_jar">空糖果罐插画</string>
+    <string name="cd_back">返回</string>
+    <string name="cd_toggle_control">切换操控方式</string>
+    <string name="cd_toggle_sound">切换音效开关</string>
+    <string name="cd_dir_up">向上移动</string>
+    <string name="cd_dir_down">向下移动</string>
+    <string name="cd_dir_left">向左移动</string>
+    <string name="cd_dir_right">向右移动</string>
+</resources>

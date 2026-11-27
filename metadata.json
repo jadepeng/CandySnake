@@ -1,0 +1,6 @@
+{
+  "name": "糖果贪吃蛇",
+  "description": "俏皮糖果卡通风离线贪吃蛇游戏，支持经典与无尽穿墙双模式、多款特殊道具、手势与虚拟方向键切换及本地最高分荣誉榜。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
